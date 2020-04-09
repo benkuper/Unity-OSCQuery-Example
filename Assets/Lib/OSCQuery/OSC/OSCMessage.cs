@@ -50,6 +50,7 @@ namespace UnityOSC
 		private const char DOUBLE  = 'd';
 		private const char STRING  = 's';
 		private const char BYTE    = 'b';
+		private const char COLOR    = 'r';
 		private const char DEFAULT = ',';
 		
 		private string _typeTag;
@@ -144,6 +145,10 @@ namespace UnityOSC
 						value = OSCPacket.UnpackValue<byte[]>(data, ref start);
 						break;
 
+					case COLOR:
+						value = OSCPacket.UnpackValue<UnityEngine.Color>(data, ref start);
+						break;
+
 					default:
 						Console.WriteLine("Unknown tag: " + tag);
 						continue;
@@ -195,6 +200,10 @@ namespace UnityOSC
 
 				case "Byte[]":
 					typeTag = BYTE;
+					break;
+
+				case "Color":
+					typeTag = COLOR;
 					break;
 
 				default:

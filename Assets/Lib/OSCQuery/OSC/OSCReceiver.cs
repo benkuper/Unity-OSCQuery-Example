@@ -28,7 +28,7 @@ using UnityEditor;
 
 namespace UnityOSC
 {
-    public class OSCReciever
+    public class OSCReceiver
     {
         Queue<OSCMessage> _queue = new Queue<OSCMessage>();
         OSCServer _server;
@@ -46,7 +46,7 @@ namespace UnityOSC
                 _server.Close();
             }
             _server = new OSCServer(port);
-            _server.SleepMilliseconds = 0;
+            _server.SleepMilliseconds = 1;
             _server.PacketReceivedEvent += didRecievedEvent;
         }
         

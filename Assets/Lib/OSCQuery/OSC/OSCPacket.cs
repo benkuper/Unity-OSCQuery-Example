@@ -23,6 +23,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace UnityOSC
 {
@@ -164,8 +165,17 @@ namespace UnityOSC
 					data = bytes.ToArray();
 					break;
 
+				case "Color":
+					Color32 c = (Color32)valueObject;
+					int colorInt = c.r << 24 | c.g << 16 | c.b << 8 | c.a;
+					data = BitConverter.GetBytes(colorInt);
+					if (BitConverter.IsLittleEndian) data = SwapEndian(data);
+
+					break;
+
 				default:
-					throw new Exception("Unsupported data type.");
+					UnityEngine.Debug.LogWarning("Unsupported data type.");
+					break;
 			}
 			return data;
 		}
@@ -184,7 +194,7 @@ namespace UnityOSC
 		/// </returns>
 		protected static T UnpackValue<T>(byte[] data, ref int start)
 		{
-			object msgvalue; //msgvalue is casted and returned by the function
+			object msgvalue = null; //msgvalue is casted and returned by the function
 			Type type = typeof(T);
 			byte[] buffername;
 
@@ -212,6 +222,7 @@ namespace UnityOSC
 				switch (type.Name)
 				{
 					case "Int32":
+					case "Color":
 					case "Single"://this also serves for float numbers
 						buffername = new byte[4];
 						break;
@@ -251,8 +262,15 @@ namespace UnityOSC
 						msgvalue = BitConverter.ToDouble(buffername, 0);
 						break;
 
+					case "Color":
+						int ci = BitConverter.ToInt32(buffername, 0);
+						Color32 c = new Color32((byte)((ci >> 24) & 0xFF), (byte)((ci >> 16) & 0xFF), (byte)((ci >> 8) & 0xFF), (byte)(ci & 0xFF));
+						msgvalue = (Color)c;
+						break;
+
 					default:
-						throw new Exception("Unsupported data type.");
+						UnityEngine.Debug.LogWarning("Unsupported data type : "+type.Name);
+						break;
 				}
 			}
 

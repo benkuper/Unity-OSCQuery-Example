@@ -24,6 +24,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UnityOSC
 {
@@ -54,7 +55,7 @@ namespace UnityOSC
 		private Thread _receiverThread;
 		private OSCPacket _lastReceivedPacket;
 		private int _sleepMilliseconds = 10;
-        private int _bufferSize = 1024;
+        private int _bufferSize = 4096;
 		#endregion
 		
 		#region Properties
@@ -139,18 +140,17 @@ namespace UnityOSC
         /// </summary>
         public void Connect()
 		{
-			if(this._udpClient != null) Close();
-			
 			try
 			{
-				_udpClient = new UdpClient(_localPort);
+				_udpClient = new UdpClient(new IPEndPoint(IPAddress.Any,_localPort));
+				_udpClient.EnableBroadcast = true;
                 _udpClient.Client.ReceiveBufferSize = _bufferSize;
                 _receiverThread = new Thread(new ThreadStart(this.ReceivePool));
 				_receiverThread.Start();
 			}
 			catch(Exception e)
 			{
-				throw e;
+				Debug.LogError("OSCServer could not bind the port " + _localPort);
 			}
 		}
 		
@@ -161,7 +161,7 @@ namespace UnityOSC
 		{
 			if(_receiverThread !=null) _receiverThread.Abort();
 			_receiverThread = null;
-			_udpClient.Close();
+			if(_udpClient != null) _udpClient.Close();
 			_udpClient = null;
 		}
 		
@@ -177,7 +177,6 @@ namespace UnityOSC
 			try
 			{
 				byte[] bytes = _udpClient.Receive(ref ip);
-
 				if(bytes != null && bytes.Length > 0)
 				{
                     OSCPacket packet = OSCPacket.Unpack(bytes);
@@ -187,8 +186,8 @@ namespace UnityOSC
                     PacketReceivedEvent(this, _lastReceivedPacket);	
 				}
 			}
-			catch{
-				throw new Exception(String.Format("Can't create server at port {0}", _localPort));
+			catch(Exception e){
+				Debug.LogError(String.Format("Receive error at port {0} : {1}", _localPort, e.StackTrace));
   			}
 		}
 		
@@ -197,13 +196,15 @@ namespace UnityOSC
 		/// </summary>
 		private void ReceivePool()
 		{
-			while( true )
+			while( true)
 			{
-				Receive();
-				
-                if (_udpClient.Available == 0)
-				    Thread.Sleep(_sleepMilliseconds);
+
+				while(_udpClient != null && _udpClient.Available > 0) Receive();
+				if (_udpClient == null) return;
+
+				Thread.Sleep(_sleepMilliseconds);
 			}
+			Debug.Log("End thread");
 		}
 		#endregion
 	}
