@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,7 +10,6 @@ using UnityOSC;
 
 namespace OSCQuery
 {
-
     public class CompInfo
     {
         public CompInfo(Component comp, FieldInfo info)
@@ -30,7 +30,7 @@ namespace OSCQuery
 
         public Component comp;
         public bool isField;
-        public System.Type type;
+        public Type type;
         public FieldInfo fieldInfo;
         public PropertyInfo propInfo;
     }
@@ -40,15 +40,21 @@ namespace OSCQuery
         [Header("Network settings")]
         public int localPort = 9010;
 
+        [Header("Setup & Filters")]
+        public GameObject rootObject;
+        public enum ObjectFilterMode { All, Include, Exclude }
+        public ObjectFilterMode objectFilterMode;
+        public List<GameObject> filteredObjects;
+
+
         HttpListener listener;
         Thread serverThread;
-
-        HttpListenerRequest currentRequest;
-        string responseString;
 
         OSCReceiver receiver;
 
         Dictionary<string, CompInfo> compInfoMap;
+
+        JSONObject queryData;
 
         void Awake()
         {
@@ -61,7 +67,7 @@ namespace OSCQuery
             listener = new HttpListener();
             listener.Prefixes.Add("http://*:" + localPort + "/");
 
-            generateResponse();
+            rebuildDataTree();
         }
 
         private void OnEnable()
@@ -76,7 +82,6 @@ namespace OSCQuery
                 receiver = new OSCReceiver();
                 receiver.Open(localPort);
             }
-
         }
 
         private void OnDisable()
@@ -84,68 +89,54 @@ namespace OSCQuery
             if (serverThread != null) serverThread.Abort();
             if (listener != null) listener.Stop();
             if (receiver != null) receiver.Close();
-
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (currentRequest != null) responseString = generateResponse();
             ProcessIncomingMessages();
         }
 
-
         void RunThread()
         {
-            currentRequest = null;
-            responseString = "";
-
             while (true)
             {
                 HttpListenerContext context = listener.GetContext();
-                currentRequest = context.Request;
 
-                while (responseString == "")
-                {
-                    //wait
-                }
-
-                // Obtain a response object.
 
                 HttpListenerResponse response = context.Response;
                 response.AddHeader("Content-Type", "application/json");
-                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(queryData.ToString(true));
 
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;
                 System.IO.Stream output = response.OutputStream;
                 output.Write(buffer, 0, buffer.Length);
                 output.Close();
-
-                currentRequest = null;
-                responseString = "";
-
             }
         }
 
-        string generateResponse()
+        void rebuildDataTree()
         {
             compInfoMap = new Dictionary<string, CompInfo>();
 
-            JSONObject o = new JSONObject("root");
-            o.SetField("ACCESS", 0);
-            GameObject[] rootObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
-
-            JSONObject co = new JSONObject();
-            foreach (GameObject go in rootObjects)
+            if (rootObject != null) queryData = getObjectData(rootObject, "");
+            else
             {
-                string goName = SanitizeName(go.name);
-                co.SetField(goName, getObjectData(go, "/" + goName));
+                queryData = new JSONObject("root");
+                queryData.SetField("ACCESS", 0);
+                GameObject[] rootObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+
+                JSONObject co = new JSONObject();
+                foreach (GameObject go in rootObjects)
+                {
+                    if (!checkFilteredObject(go)) continue;
+                    string goName = SanitizeName(go.name);
+                    co.SetField(goName, getObjectData(go, "/" + goName));
+                }
+
+                queryData.SetField("CONTENTS", co);
             }
-
-            o.SetField("CONTENTS", co);
-
-            return o.ToString(true);
         }
 
         JSONObject getObjectData(GameObject go, string baseAddress = "")
@@ -156,6 +147,7 @@ namespace OSCQuery
             for (int i = 0; i < go.transform.childCount; i++)
             {
                 GameObject cgo = go.transform.GetChild(i).gameObject;
+                if (!checkFilteredObject(cgo)) continue;
                 string cgoName = SanitizeName(cgo.name);
                 co.SetField(cgoName, getObjectData(cgo, baseAddress + "/" + cgoName));
             }
@@ -164,6 +156,8 @@ namespace OSCQuery
 
             foreach (Component comp in comps)
             {
+                if (!checkFilteredComp(comp.GetType())) continue;
+
                 int dotIndex = comp.GetType().ToString().LastIndexOf(".");
                 string compType = comp.GetType().ToString().Substring(Mathf.Max(dotIndex + 1, 0));
 
@@ -224,7 +218,7 @@ namespace OSCQuery
             return o;
         }
 
-        JSONObject getPropObject(System.Type type, object value, RangeAttribute range)
+        JSONObject getPropObject(Type type, object value, RangeAttribute range)
         {
             JSONObject po = new JSONObject();
             po.SetField("ACCESS", 3);
@@ -349,9 +343,23 @@ namespace OSCQuery
 
         string SanitizeName(string niceName)
         {
-            return niceName.Replace(" ", "-");
+            return niceName.Replace(" ", "-").Replace("(", "").Replace(")", "");
         }
 
+
+
+        bool checkFilteredObject(GameObject go)
+        {
+            return objectFilterMode == ObjectFilterMode.All
+                || (objectFilterMode == ObjectFilterMode.Include && filteredObjects.Contains(go))
+                || (objectFilterMode == ObjectFilterMode.Exclude && !filteredObjects.Contains(go));
+        }
+
+        bool checkFilteredComp(Type type)
+        {
+            
+            return true;
+        }
 
         void ProcessIncomingMessages()
         {

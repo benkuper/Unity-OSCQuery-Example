@@ -76,7 +76,6 @@ public class MouseOrbitImproved : MonoBehaviour
 
             if (draggingEnabled)
             {
-                Debug.Log("Dragging " + Input.GetAxis("Mouse X"));
                 x += Input.GetAxis("Mouse X") * xSpeed;
                 y -= Input.GetAxis("Mouse Y") * ySpeed;
 
