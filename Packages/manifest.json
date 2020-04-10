@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.benkuper.oscquery": "https://github.com/benkuper/Unity-OSCQuery.git",
     "com.unity.collab-proxy": "1.2.16",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.ide.vscode": "1.1.4",
@@ -38,5 +39,11 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "com.benkuper.oscquery": {
+      "revision": "HEAD",
+      "hash": "d5a69fc806a2fa92b4ac874763928cfc74f09c67"
+    }
   }
 }
