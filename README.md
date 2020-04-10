@@ -5,7 +5,7 @@ A seamless integration of OSCQuery in Unity
 
 # Demo
 
-[![Alt text](src="https://i.ytimg.com/vi/pLfj06am8gU/hqdefault.jpg?sqp=-oaymwEZCPYBEIoBSFXyq4qpAwsIARUAAIhCGAFwAQ==&rs=AOn4CLCGOuAQ0fEfRzejK01SJmT2XiI1gg")](https://www.youtube.com/watch?v=pLfj06am8gU)
+[![Alt text](src="https://i.ytimg.com/vi/pLfj06am8gU/hqdefault.jpg")](https://www.youtube.com/watch?v=pLfj06am8gU)
 
 https://www.youtube.com/watch?v=pLfj06am8gU
 
