@@ -6,6 +6,9 @@ public class MatControl : MonoBehaviour
 {
     public Color mainColor;
 
+    public enum ColorMode { Albedo, Emission }
+    public ColorMode colorMode;
+
     void Start()
     {
         

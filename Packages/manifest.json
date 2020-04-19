@@ -4,7 +4,7 @@
     "com.unity.collab-proxy": "1.2.16",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.ide.vscode": "1.1.4",
-    "com.unity.test-framework": "1.1.11",
+    "com.unity.test-framework": "1.1.13",
     "com.unity.textmeshpro": "2.0.1",
     "com.unity.timeline": "1.2.12",
     "com.unity.ugui": "1.0.0",
@@ -43,7 +43,7 @@
   "lock": {
     "com.benkuper.oscquery": {
       "revision": "HEAD",
-      "hash": "d5a69fc806a2fa92b4ac874763928cfc74f09c67"
+      "hash": "e5e54c4107e244d44cc5cbe0d9c458817039c96f"
     }
   }
 }

@@ -257,7 +257,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a8eef7e00dc54a438cd90b8f56dfa74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainColor: {r: 0, g: 0, b: 0, a: 0}
+  mainColor: {r: 0.745283, g: 0.29349026, b: 0.05273228, a: 1}
+  colorMode: 0
 --- !u!1 &603193480
 GameObject:
   m_ObjectHideFlags: 0
@@ -537,6 +538,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainColor: {r: 0, g: 0, b: 0, a: 0}
+  colorMode: 0
 --- !u!65 &1205043729
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -784,6 +786,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainColor: {r: 0, g: 0, b: 0, a: 0}
+  colorMode: 0
 --- !u!65 &1440133719
 BoxCollider:
   m_ObjectHideFlags: 0
