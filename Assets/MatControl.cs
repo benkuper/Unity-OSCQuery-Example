@@ -19,4 +19,19 @@ public class MatControl : MonoBehaviour
     {
         GetComponent<Renderer>().material.color = mainColor;
     }
+
+    public void launchSomething()
+    {
+        mainColor = Color.yellow;
+    }
+
+    public void launchWithDefaultParameters(bool white = true)
+    {
+        mainColor = white?Color.white:Color.red;
+    }
+
+    public void launch2(bool white = false)
+    {
+        mainColor = white ? Color.white : Color.red;
+    }
 }
